@@ -1,0 +1,104 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.nec</groupId>
+  <artifactId>pos</artifactId>
+  <version>0.1</version>
+  <packaging>jar</packaging>
+
+  <name>GMPOS</name>
+  <url>http://maven.apache.org</url>
+  
+  <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.0.5.RELEASE</version>
+    </parent>
+
+
+ <properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+      
+</properties>
+
+
+	<build>
+		<plugins>
+			<plugin>
+			  <groupId>org.codehaus.mojo</groupId>
+			  <artifactId>jaxws-maven-plugin</artifactId>
+			  <version>2.5</version>
+			  <executions>
+			  
+				 <execution>
+					<id>bruebox</id>
+					<goals>
+					  <goal>wsimport</goal>
+					</goals>
+					<configuration>
+						<args>
+       					<arg>-B-XautoNameResolution</arg>
+    					</args>
+						<bindingDirectory>
+                          src/main/resources
+                      </bindingDirectory>
+                      <bindingFiles>
+                      <bindingFile>
+                      		binding/binding.xml
+                     </bindingFile>
+                      </bindingFiles>
+                     <wsdlDirectory>src/main/resources</wsdlDirectory>
+					  <wsdlFiles>
+						 <wsdlFile>wsdl/BrueBoxService.wsdl</wsdlFile>
+					  </wsdlFiles>
+					  <sourceDestDir>${project.build.directory}/generated-sources/jaxws/</sourceDestDir>
+					  <staleFile>${project.build.directory}/generated-sources/stale/.staleFlag_ghats_go</staleFile>
+                   </configuration>
+				 </execution>
+				 
+			  </executions>
+			  
+			</plugin>
+		<!-- 	<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>com.mizuho.tbcs.ghats.gateway.App</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin> -->
+			
+			</plugins>
+	</build>
+
+  <dependencies>
+  	
+	        <dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-web-services</artifactId>
+</dependency>
+  
+  <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>2.10.0</version>
+            </dependency>
+            <dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-core</artifactId>
+    <version>2.10.0</version>
+</dependency> 
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>
