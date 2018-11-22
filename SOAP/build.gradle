@@ -1,0 +1,117 @@
+buildscript {
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }  
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.5.RELEASE")
+    } 
+}
+apply plugin: "java"
+apply plugin: "eclipse"
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+ 
+repositories {
+      mavenCentral()
+    jcenter()
+}
+ 
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+configurations {
+    jaxws
+}
+
+dependencies {
+
+    jaxws 'com.sun.xml.ws:jaxws-tools:2.1.4'
+     compile 'org.springframework.boot:spring-boot-starter-web' 
+     compile 'org.springframework:spring-oxm:3.0.0.RELEASE'
+     compile 'org.springframework.ws:spring-ws:1.5.2'
+     
+     runtime 'org.springframework.boot:spring-boot-starter-web'
+     runtime 'org.springframework:spring-oxm:3.0.0.RELEASE' 
+     runtime 'org.springframework.ws:spring-ws:1.5.2'
+   testCompile 'junit:junit:4.12'
+   
+
+}
+
+task wsimport {
+    ext.destDir = file("$projectDir/src/main/gen")
+    doLast {
+        ant {
+            sourceSets.main.output.classesDir.mkdirs()
+            destDir.mkdirs()
+            taskdef(name: 'wsimport',
+                    classname: 'com.sun.tools.ws.ant.WsImport',
+                    classpath: configurations.jaxws.asPath
+            )
+            wsimport(keep: true,
+                    destdir: sourceSets.main.output.classesDir,
+                    sourcedestdir: destDir,
+                    extension: "true",
+                    verbose: "false",
+                    quiet: "false",
+                    package: "com.nec",
+                    xnocompile: "true",
+                    wsdl: 'D:/Krishna/fo/src/main/wsdl/BrueBoxService.wsdl') {
+                xjcarg(value: "-XautoNameResolution")
+            }
+        }
+    }
+}
+
+ 
+
+project.ext {
+  genSrcDir = projectDir.absolutePath + '/src/main/gen'
+}
+
+compileJava {
+    dependsOn wsimport
+    source wsimport.destDir
+    options.compilerArgs += ['-s', project.genSrcDir]
+}
+
+compileJava.doFirst {
+  task createGenDir << {
+    ant.mkdir(dir: project.genSrcDir)
+    println project.genSrcDir
+  }
+
+  createGenDir.execute()
+
+  println 'createGenDir DONE'
+
+}
+
+eclipse.classpath.file.whenMerged{
+
+  classpath->def genSrc = new org.gradle.plugins.ide.eclipse.model.SourceFolder('gen/main/java', null)
+
+  classpath.entries.add(genSrc)
+
+}
+
+ 
+
+task afterEclipseImport(description: "Post processing after project generation", group: "IDE") {
+  doLast {
+    compileJava.execute()
+    def classpath = new XmlParser().parse(file(".classpath"))
+    new Node(classpath, "classpathentry", [kind: 'src', path: 'src/main/gen']);
+    def writer = new FileWriter(file(".classpath"))
+    def printer = new XmlNodePrinter(new PrintWriter(writer))
+    printer.setPreserveWhitespace(true)
+    printer.print(classpath)
+
+  }
+
+}
